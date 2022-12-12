@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\V1\Auth\VerifyEmailController;
+use App\Mail\WelcomeMail;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,4 +18,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])->middleware(['signed'])->name('verification.verify');
+
+Route::get('email', function() {
+    return (new WelcomeMail(User::factory()->make()))->render();
 });

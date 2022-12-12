@@ -14,7 +14,7 @@ class PostResource extends JsonResource
      */
     public function toArray($request)
     {
-       // $category = $this->whenLoaded('category');
+        $category = $this->whenLoaded('category');
 
         return [
             'id' => (string) $this->id,
@@ -23,10 +23,11 @@ class PostResource extends JsonResource
                 'title' => $this->title,
                 'image' => $this->image,
                 'description' => $this->description,
-                'date' => $this->date,
-                'category' => new CategoryResource($this->category),
-                //'tag' => new TagResource($this->tag),
-                'tags' => $this->tags
+                'post_date' => $this->post_date,
+                'category' => new CategoryResource($category),
+                'tag' => $this->tags,
+               'created_at' => $this->created_at,
+               'update_at' => $this->update_at,
             ]
         ];
     }

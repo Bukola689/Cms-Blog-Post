@@ -15,7 +15,7 @@ class TagFactory extends Factory
     public function definition()
     {
         return [
-            'user_id' => User::all()->random()->id,
+            //'user_id' => User::all()->random()->id,
             'name' => $this->faker->name,
         ];
     }

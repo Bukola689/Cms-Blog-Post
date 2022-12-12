@@ -21,7 +21,7 @@ class PostFactory extends Factory
             'title' => $this->faker->name,
             'image' => $this->faker->imageUrl($width = 140, $height=300),
             'description' => $this->faker->sentence,
-            'date' => $this->faker->date
+            'post_date' => $this->faker->date
         ];
     }
 }
