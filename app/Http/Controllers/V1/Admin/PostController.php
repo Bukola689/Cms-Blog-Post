@@ -11,11 +11,10 @@ use App\Http\Resources\PostResource;
 use App\Http\Requests\PostStoreRequest;
 use App\Http\Requests\PostUpdateRequest;
 use App\Repositories\Post\PostRepository;
-use App\Repositories\Post\IPostRepository;
-use Facade\FlareClient\Stacktrace\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PostController extends Controller
 {
@@ -32,18 +31,12 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = $this->post->getAllPosts();
-
-        //$posts->dd();
+        
+        $posts = Cache::remember('posts', 60, function () {
+            return $this->post->getAllPosts();
+        });
 
         return PostResource::collection($posts);
-    }
-
-    public function getTotalPost()
-    {
-        $posts = Post::count();
-
-        return response()->json($posts);
     }
 
     /**
@@ -76,6 +69,8 @@ class PostController extends Controller
         $image->move('posts/image', $image_new_name);
 
         $this->post->storePost($request, $data);
+
+        Cache::put('post', $data);
     
         return response()->json([
 
@@ -92,8 +87,12 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        return $this->post->getSinglePost($post);
-      
+
+        $postShow = Cache::remember('post:'. $post->id, 60, function () use ($post) {
+            return $this->post->getSinglePost($post);
+        });
+        
+        return response()->json($postShow);
     }
 
     /**
@@ -132,8 +131,9 @@ class PostController extends Controller
             $data['image'] = 'posts/image/' . $image_new_name;    
       }
 
-
        $this->post->updatePost($request, $id, $data);
+
+       Cache::put('post', $data);
 
         return response()->json([
             'message' => 'Post Updated Successfully !'
@@ -151,6 +151,8 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         $this->post->deletePost($post);
+
+        Cache::pull('post');
 
         return response()->json([
             "message" => 'Post deleted successfully !'

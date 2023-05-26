@@ -7,12 +7,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Http\Resources\PostResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class GetPostController extends Controller
 {
     public function allPost()
     {
-        $allPosts = Post::with('category')->orderBy('id', 'desc')->paginate(5);
+        $allPosts = Cache::remember('posts', 60, function () {
+           return  Post::with('category')->orderBy('id', 'desc')->paginate(5);
+        });
 
         return PostResource::collection($allPosts);
     }
@@ -30,7 +33,10 @@ class GetPostController extends Controller
 
     public function postById(Post $post)
     {
-        return new PostResource($post);
+        $postId = Cache::remember('post:'. $post->id, 60, function () use ($post) {
+            return $post;
+        });
+        return new PostResource($postId);
     }
 
     public function searchPost($search)

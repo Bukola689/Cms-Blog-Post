@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Repositories\AdminComment\AdminCommentRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class AdminCommentController extends Controller
 {
@@ -19,7 +20,10 @@ class AdminCommentController extends Controller
 
     public function index()
     {
-        $comments = $this->comment->allAdminComments();
+
+        $comments = cache()->remember('comments', 30, function () {
+             return  $this->comment->allAdminComments();
+        });
 
         return response()->json($comments);
     }
@@ -27,7 +31,9 @@ class AdminCommentController extends Controller
 
     public function destroy(Comment $comment)
     {
-      $comment = $this->comment->deleteAdminComment($comment);
+      $this->comment->deleteAdminComment($comment);
+
+      Cache::pull('comment');
 
       return response()->json([
         'message' => 'Comment Deleted Successfully',

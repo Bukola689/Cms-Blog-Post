@@ -36,6 +36,43 @@ class RouteServiceProvider extends ServiceProvider
                 ->middleware('api')
                 ->group(base_path('routes/api.php'));
 
+             Route::prefix('admin')
+                ->middleware(['auth:sanctum', 'role:admin'])
+                ->namespace($this->namespace)
+                ->name('admin.')
+                ->group(base_path('routes/api/v1/admin/users.php'));
+            
+             Route::prefix('admin')
+                ->middleware(['auth:sanctum', 'role:admin'])
+                ->namespace($this->namespace)
+                ->name('admin.')
+                ->group(base_path('routes/api/v1/admin/categorys.php'));
+
+             Route::prefix('admin')
+                ->middleware(['auth:sanctum', 'role:admin'])
+                ->namespace($this->namespace)
+                ->name('admin.')
+                ->group(base_path('routes/api/v1/admin/posts.php'));
+
+             Route::prefix('admin')
+                ->middleware(['auth:sanctum', 'role:admin'])
+                ->namespace($this->namespace)
+                ->name('admin.')
+                ->group(base_path('routes/api/v1/admin/tags.php'));
+
+
+             Route::prefix('admin')
+                ->middleware(['auth:sanctum', 'role:admin'])
+                ->namespace($this->namespace)
+                ->name('admin.')
+                ->group(base_path('routes/api/v1/admin/contacts.php'));
+
+            Route::prefix('admin')
+                ->middleware(['auth:sanctum', 'role:admin'])
+                ->namespace($this->namespace)
+                ->name('admin.')
+                ->group(base_path('routes/api/v1/admin/settings.php'));
+
         });
     }
 

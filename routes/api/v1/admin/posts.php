@@ -6,10 +6,6 @@ use App\Http\Controllers\V1\Admin\PostController;
 
 use Illuminate\Support\Facades\Route;
 
-
-
-Route::group(['middleware' => ['role:admin'], 'prefix' => 'admin'], function () {
-
     Route::get('/posts', [PostController::class, 'index']);
     Route::get('/count-posts', [PostController::class, 'getTotalPost']);
     Route::post('/posts', [PostController::class, 'store']);
@@ -17,5 +13,4 @@ Route::group(['middleware' => ['role:admin'], 'prefix' => 'admin'], function () 
     Route::put('/posts/{id}', [PostController::class, 'update']);
     Route::DELETE('/posts/{post}', [PostController::class, 'destroy']);
     Route::get('/posts/{search}', [PostController::class, 'searchPost']);   
-
-  });  
+ 

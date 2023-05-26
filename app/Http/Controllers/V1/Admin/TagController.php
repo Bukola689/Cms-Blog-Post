@@ -10,6 +10,7 @@ use App\Http\Requests\TagUpdateRequest;
 use App\Repositories\Tag\TagRepository;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class TagController extends Controller
 {
@@ -26,7 +27,9 @@ class TagController extends Controller
      */
     public function index()
     {
-        $tags = $this->tag->allTag();
+        $tags = Cache::remember('tags', 60, function () {
+            return $this->tag->allTag();
+        });
 
         return TagResource::collection($tags);
     }
@@ -36,12 +39,7 @@ class TagController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function getTotalTag()
-    {
-        $tags = Tag::count();
 
-        return response()->json($tags);
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -54,6 +52,8 @@ class TagController extends Controller
       $data = $request->all();
       
       $this->tag->storeTag($data);
+
+      Cache::put('tag', $data);
 
        return response()->json([
         'message' => 'Tag added Successfull'
@@ -68,7 +68,11 @@ class TagController extends Controller
      */
     public function show(Tag $tag)
     {
-        return $this->tag->getSingleTag($tag);
+        $tagShow = cache()->rememberForever('tag:'. $tag->id, function () use ($tag) {
+            return $this->tag->getSingleTag($tag);    
+        });
+        
+        return response()->json($tagShow);
     }
 
     /**
@@ -95,6 +99,8 @@ class TagController extends Controller
 
        $this->tag->updateTag($tag, $data);
 
+       Cache::put('tag', $data);
+
        return response()->json([
         'message' => 'Tag Updated Successfully !'
        ]);
@@ -109,7 +115,9 @@ class TagController extends Controller
      */
     public function destroy(Tag $tag)
     {
-        $tag = $this->tag->deleteTag($tag);
+        $this->tag->deleteTag($tag);
+
+        Cache::pull('tag');
 
         return response()->json([
             "message" => 'Tag deleted successfully !'

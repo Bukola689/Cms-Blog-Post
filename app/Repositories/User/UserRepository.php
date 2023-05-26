@@ -26,6 +26,13 @@ class UserRepository implements IUserRepository
         'first_name' => $data['first_name'],
         'last_name' => $data['last_name'],
         'username' => $data['username'],
+        'gender' => $data['gender'],
+        'occupation' => $data['occupation'],
+        'country' => $data['country'],
+        'state' => $data['state'],
+        'city' => $data['city'],
+        'phone_number' => $data['phone_number'],
+        'address' => $data['address'],
         'email' => $data['email'],
         'password' => $data['password'],
        ]);
@@ -33,18 +40,23 @@ class UserRepository implements IUserRepository
 
     public function getSingleUser(User $user)
     {
-        $this->user->getSingleUser();
+        return $user;
     }
 
     public function updateUser(User $user, array $data)
     {
         $user->update([
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'username' => $data['username'],
-            'email' => $data['email'],
-            'password' => $data['password'],
-           ]);
+          'first_name' => $data['first_name'],
+          'last_name' => $data['last_name'],
+          'username' => $data['username'],
+          'gender' => $data['gender'],
+          'occupation' => $data['occupation'],
+          'country' => $data['country'],
+          'state' => $data['state'],
+          'city' => $data['city'],
+          'phone_number' => $data['phone_number'],
+          'address' => $data['address'],
+         ]);
     }
 
     public function deleteUser(User $user)

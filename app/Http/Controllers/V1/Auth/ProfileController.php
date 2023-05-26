@@ -1,23 +1,30 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\V1\Auth;
 
+use App\Http\Controllers\Controller;
+use App\Events\Profile\ProfileCreated;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\UserResource;
+use App\Notifications\PasswordNotification;
+use App\Notifications\ProfileNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Password;
 
 class ProfileController extends Controller
 {
     public function updateProfile(Request $request)
     {
-        //dd($request->all());
+
+        $user = User::first();
 
         $data = Validator::make($request->all(),[
             'first_name' => 'required',
             'last_name' => 'required',
-            'username' => 'required',
+            'username' => 'required|unique:users',
             'avatar' => 'required',
             'gender' => 'required',
             'occupation' => 'required',
@@ -65,6 +72,12 @@ class ProfileController extends Controller
         $profile->address = $request->input('address');
         $profile->update();
 
+        $user->verify(new ProfileNotification($user));
+
+        event(new ProfileCreated($profile));
+
+        Cache::put('user', $data);
+
         return new UserResource($profile);
 
       // return response()->json(['message' => 'successfully']);
@@ -72,6 +85,8 @@ class ProfileController extends Controller
 
     public function changePassword(Request $request)
     {
+
+        $user = User::first();
 
         $data = Validator::make($request->all(), [
             "old_password" => "required",
@@ -92,16 +107,18 @@ class ProfileController extends Controller
                     'password' => Hash::make($request->password)
                 ]);
 
-                //dd($request->password);
+               $user->verify(new PasswordNotification($user));
+
+               Cache::put('user', $data);
     
                return response()->json([
                   'message'=> 'Password Updated Successfully',
                ], 200);
     
-            // } else {
-            //     return response()->json([
-            //         'message' => 'old password does no match !'
-            //     ], 401);
+            } else {
+                return response()->json([
+                    'message' => 'old password does no match !'
+                ], 401);
              }
     }
 }

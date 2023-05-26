@@ -1,18 +1,17 @@
 <?php
 
-namespace App\Listeners;
+namespace App\Listeners\Profile;
 
-use App\Mail\WelcomeMail;
+use App\Mail\ProfileMail;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Mail;
 
-class SendWelcomeEmail
+class ProfileListener
 {
 
     private $user;
-    
     /**
      * Create the event listener.
      *
@@ -20,7 +19,7 @@ class SendWelcomeEmail
      */
     public function __construct(User $user)
     {
-       $this->user = $user;
+        $this->user = $user;
     }
 
     /**
@@ -31,6 +30,6 @@ class SendWelcomeEmail
      */
     public function handle($event)
     {
-        Mail::to($event->email)->send(new WelcomeMail($event->user));
+        Mail::to($event->email)->send(new ProfileMail($event->user));
     }
 }

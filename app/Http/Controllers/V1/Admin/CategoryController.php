@@ -11,6 +11,7 @@ use App\Repositories\Category\CategoryRepository;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends Controller
 {
@@ -27,17 +28,15 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = $this->category->allCategorys();
+        $count = Category::orderBy('id', 'desc')->count();
 
-        return CategoryResource::collection($categories);
+        $categories = cache()->remember('categorys', 60, function () {
+            return $this->category->allCategorys();
+        });
+
+        return CategoryResource::collection([$count, $categories]);
     }
 
-    public function getTotalCategory()
-    {
-        $categories = $this->category->allCategorys();
-
-        return response()->json($categories);
-    }
 
     /**
      * Show the form for creating a new resource.
@@ -61,6 +60,8 @@ class CategoryController extends Controller
             $data = $request->all();
 
             $this->category->storeCategory($data);
+
+            Cache::put('category', $data);
     
              return response()->json([
                 'message' => 'Category Saved Successfully !'
@@ -75,7 +76,13 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-      return $this->category->getSingleCategory($category);
+        $categoryShow = Cache::remember('category:'. $category->id, function () use ($category) {
+
+            return $this->category->getSingleCategory($category);
+        });
+
+        return response()->json($categoryShow);
+     
     }
 
     /**
@@ -101,7 +108,9 @@ class CategoryController extends Controller
         
       $data = $request->all();
 
-     $category = $this->category->updateCategory($category, $data);
+      $this->category->updateCategory($category, $data);
+
+      Cache::put('category', $data); 
 
      return response()->json([
         'message' => 'Category Updated Successfully'
@@ -117,9 +126,9 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        $category = $this->category->deleteCategory($category);
+       $this->category->deleteCategory($category);
 
-       // return new CategoryResource($category);
+       Cache::pull('post');
 
        return response()->json([
         "message" => 'Catgeory deleted successfully !',
